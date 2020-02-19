@@ -50,44 +50,36 @@ while True:
         if event.type == pygame.QUIT: pygame.quit(); sys.exit()
         cam.events(event)
     screen.fill((255,255,255))
-    if True:
-        for obj in cubes:
-            vert_list = []; screen_coords = []
-            for x,y,z in obj.verts:
-                x-=cam.pos[0]; y-=cam.pos[1]; z-=cam.pos[2]
-                x,z = rotate2d((x,z), cam.rot[1])
-                y,z = rotate2d((y,z), cam.rot[0])
-                vert_list += [(x,y,z)]
-                if z == 0: z = 0.001
-                #else:
-                f=200/z
-                x,y = x*f, y*f
-                screen_coords+=[(cx+int(x), cy+int(y))]
+    for obj in cubes:
+        vert_list = []; screen_coords = []
+        for x,y,z in obj.verts:
+            x-=cam.pos[0]; y-=cam.pos[1]; z-=cam.pos[2]
+            x,z = rotate2d((x,z), cam.rot[1])
+            y,z = rotate2d((y,z), cam.rot[0])
+            vert_list += [(x,y,z)]
+            if z == 0: z = 0.001
+            f=200/z
+            x,y = x*f, y*f
+            screen_coords+=[(cx+int(x), cy+int(y))]
 
-            face_list = []; face_color = []; depth = []
-            for f in range(len(obj.faces)):
-                face = obj.faces[f]
-                on_screen = False
-                for i in face:
-                    x,y = screen_coords[i]
-                    if vert_list[i][2]>0 and x>0 and x<w and y>0 and y<h: on_screen = True; break
+        face_list = []; face_color = []; depth = []
+        for f in range(len(obj.faces)):
+            face = obj.faces[f]
+            on_screen = False
+            for i in face:
+                x,y = screen_coords[i]
+                if vert_list[i][2]>0 and x>0 and x<w and y>0 and y<h: on_screen = True; break
 
-                if on_screen:
-                    coords = [screen_coords[i] for i in face]
-                    face_list +=[coords]
-                    face_color += (128,128,128)
-                    depth += [sum(sum(vert_list[j][i] for j in face)**2 for i in range(3))]
-            order = sorted(range(len(face_list)),key=lambda i: depth[i], reverse=0)
-            for i in order:
-                try:
-                    pygame.draw.polygon(screen, face_color[i], face_list[i])
-                except: pass
-    if False:
-        for x,y,z in verts:
-            z+=5
-            f = 200/z
-            x,y = x*f,y*f
-            pygame.draw.circle(screen,(0,0,0),(cx+int(x),cy+int(y)),6)
+            if on_screen:
+                coords = [screen_coords[i] for i in face]
+                face_list +=[coords]
+                face_color += (128,128,128)
+                depth += [sum(sum(vert_list[j][i] for j in face)**2 for i in range(3))]
+        order = sorted(range(len(face_list)),key=lambda i: depth[i], reverse=0)
+        for i in order:
+            try:
+                pygame.draw.polygon(screen, face_color[i], face_list[i])
+            except: pass
     pygame.display.flip()
     key = pygame.key.get_pressed()
     cam.update(dt,key)
